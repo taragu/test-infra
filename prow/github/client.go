@@ -2457,3 +2457,24 @@ func (s *reloadingTokenSource) Token() (*oauth2.Token, error) {
 		AccessToken: string(s.getToken()),
 	}, nil
 }
+
+// GetProjectCard of a specific issue or PR
+//
+// See https://developer.github.com/v3/projects/cards/#list-project-cards
+func (c *Client) GetProjectCard(org, repo string, num int) error {
+	c.log("GetProjectCard", org, repo, num)
+
+	// Get projects for org and org+repo
+
+	// Get project cards for each project and look for the num
+}
+
+// ClearProject delete the project card of a specific issue or PR
+//
+// See https://developer.github.com/v3/projects/cards/#delete-a-project-card
+func (c *Client) ClearProject(issueNum int) error {
+	c.log("ClearProject", issueNum)
+
+	// Get the project card for this issue
+
+}
