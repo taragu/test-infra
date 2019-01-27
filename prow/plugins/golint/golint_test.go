@@ -369,6 +369,22 @@ func TestLintCodeSuggestion(t *testing.T) {
 			},
 			comment: "",
 		},
+		{
+			name:       "Check leading spaces for package comments",
+			codeChange: "@@ -0,0 +1,5 @@\n+/*\n+     Package bar comment\n+*/\n+package bar\n+",
+			pullFiles: map[string][]byte{
+				"qux.go": []byte("/*\n     Package bar comment\n*/\npackage bar\n"),
+			},
+			comment: "```suggestion\nPackage bar comment\n```\nGolint comments: package comment should not have leading space. [More info](https://golang.org/wiki/CodeReviewComments#package-comments). <!-- golint -->",
+		},
+		{
+			name:       "Check leading spaces for package comments: no error",
+			codeChange: "@@ -0,0 +1,5 @@\n+/*\n+Package bar comment\n+*/\n+package bar\n+",
+			pullFiles: map[string][]byte{
+				"qux.go": []byte("/*\nPackage bar comment\n*/\npackage bar\n"),
+			},
+			comment: "",
+		},
 	}
 
 	lg, c, err := localgit.New()

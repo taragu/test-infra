@@ -561,3 +561,43 @@ func TestLintVarDecl(t *testing.T) {
 		}
 	}
 }
+
+func TestLintPackageComments(t *testing.T) {
+	var testcases = []struct {
+		problem            lint.Problem
+		expectedSuggestion string
+	}{
+		{
+			problem: lint.Problem{
+				Position: token.Position{
+					Filename: "qux.go",
+				},
+				Text:       "package comment should not have leading space",
+				Link:       "https://golang.org/wiki/CodeReviewComments#package-comments",
+				Category:   "comments",
+				LineText:   "     Package bar comment",
+				Confidence: 100.00,
+			},
+			expectedSuggestion: "```suggestion\nPackage bar comment```\n",
+		},
+		{
+			problem: lint.Problem{
+				Position: token.Position{
+					Filename: "qux.go",
+				},
+				Text:       "package comment should not have leading space",
+				Link:       "https://golang.org/wiki/CodeReviewComments#package-comments",
+				Category:   "comments",
+				LineText:   "Package bar comment",
+				Confidence: 100.00,
+			},
+			expectedSuggestion: "",
+		},
+	}
+	for _, test := range testcases {
+		suggestion := SuggestCodeChange(test.problem)
+		if suggestion != test.expectedSuggestion {
+			t.Errorf("Excepted code suggestion %s but got %s for LineText %s", test.expectedSuggestion, suggestion, test.problem.LineText)
+		}
+	}
+}

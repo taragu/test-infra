@@ -31,6 +31,7 @@ var (
 	lintStutterRegex         = regexp.MustCompile("name will be used as [^.]+\\.(.*) by other packages, and that stutters; consider calling this (.*)")
 	lintRangesRegex          = regexp.MustCompile("should omit (?:2nd )?values? from range; this loop is equivalent to \\x60(for .*) ...\\x60")
 	lintVarDeclRegex         = regexp.MustCompile("should (?:omit type|drop) (.*) from declaration of (?:.*); (?:it will be inferred from the right-hand side|it is the zero value)")
+	lintPackageCommentsRegex = regexp.MustCompile("package comment should not have leading space")
 )
 
 var lintHandlersMap = map[*regexp.Regexp]func(lint.Problem, []string) string{
@@ -40,6 +41,7 @@ var lintHandlersMap = map[*regexp.Regexp]func(lint.Problem, []string) string{
 	lintStutterRegex:         fixStutter,
 	lintRangesRegex:          fixRanges,
 	lintVarDeclRegex:         fixVarDecl,
+	lintPackageCommentsRegex: fixPackageComments,
 }
 
 // SuggestCodeChange returns code suggestions for a given lint.Problem
@@ -138,6 +140,20 @@ func fixVarDecl(p lint.Problem, matches []string) string {
 		return ""
 	}
 	suggestion := strings.Replace(p.LineText, " "+matches[1], "", -1)
+	return suggestion
+}
+
+func fixPackageComments(p lint.Problem, matches []string) string {
+	if len(matches) != 1 {
+		return ""
+	}
+	reLeadingWhitespaces:= regexp.MustCompile(`^(\s+)[a-zA-Z]+`)
+	leadingWhitespaces := reLeadingWhitespaces.FindStringSubmatch(p.LineText)
+	if len(leadingWhitespaces) != 2 {
+		fmt.Printf("\n\n\n\nlinetext is\n%s\n, returning early because lenth of matches is %d; problem line is %d\n\n", p.LineText, len(leadingWhitespaces), p.Position.Line)
+		return ""
+	}
+	suggestion := strings.Replace(p.LineText, leadingWhitespaces[1], "", -1)
 	return suggestion
 }
 
